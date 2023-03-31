@@ -9,6 +9,11 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+- task: TerraformInstaller@1
+  displayName: Terraform Install
+  inputs:
+    terraformVersion: 'latest'
+
 - task: TerraformCLI@0
   displayName: Terraform Init
   inputs:
@@ -19,14 +24,21 @@ steps:
   displayName: Terraform Plan
   inputs:
     command: 'plan'
-    environmentServiceName: 'youtube-app-service-connection'
+    environmentServiceNameAzureRM: 'AzureServiceConnection'
     allowTelemetryCollection: false
 
 - task: TerraformCLI@0
   displayName: Terraform Apply
   inputs:
     command: 'apply'
-    environmentServiceName: 'youtube-app-service-connection'
+    environmentServiceNameAzureRM: 'AzureServiceConnection'
     allowTelemetryCollection: true
+
+- task: TerraformTaskV4@4
+  displayName: Terraform Destroy
+  inputs:
+    provider: 'azurerm'
+    command: 'destroy'
+    environmentServiceNameAzureRM: 'AzureServiceConnection'
 
 
