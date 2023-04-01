@@ -78,6 +78,38 @@ stages:
               commandOptions: '--var-file=input.auto.tfvars'
               environmentServiceNameAzureRM: 'AzureServiceConnection'
 
+  - stage: Terraform_Destroy
+    jobs:
+      - job: TFDestroy
+        steps:
+          - task: TerraformInstaller@1
+            displayName: Terraform Install
+            inputs:
+              terraformVersion: 'latest'
+
+          - task: TerraformTaskV4@4
+            displayName: Terraform Init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'AzureServiceConnection'
+              backendAzureRmResourceGroupName: '$(TF_VAR_BKSTRGRG)'
+              backendAzureRmStorageAccountName: '$(TF_VAR_BKSTRG)'
+              backendAzureRmContainerName: '$(TF_VAR_BKCONTAINER)'
+              backendAzureRmKey: '$(TF_VAR_BKSTREGKEY)'
+          - task: TerraformTaskV4@4
+            displayName: Terraform Plan
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              commandOptions: "--var-file=input.auto.tfvars --input=false --out=tfplan"
+              environmentServiceNameAzureRM: 'AzureServiceConnection'
+          - task: TerraformTaskV4@4
+            inputs:
+              provider: 'azurerm'
+              command: 'destroy'
+              environmentServiceNameAzureRM: 'AzureServiceConnection'
+
 
 
 
