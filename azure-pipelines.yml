@@ -58,6 +58,7 @@ stages:
             inputs:
               provider: 'azurerm'
               command: 'init'
+              backendServiceArm: 'AzureServiceConnection'
               backendAzureRmResourceGroupName: '$(TF_VAR_BKSTRGRG)'
               backendAzureRmStorageAccountName: '$(TF_VAR_BKSTRG)'
               backendAzureRmContainerName: '$(TF_VAR_BKCONTAINER)'
