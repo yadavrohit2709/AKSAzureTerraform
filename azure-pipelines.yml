@@ -15,7 +15,7 @@ variables:
   bkstregkey: 'devpipeline.terraform.tfstate'
 
 stages:
-  - stage: Terraform-Initialiaze-and-validate
+  - stage: Terraform_Initialiaze_and_validate
     jobs:
       - job: TFInitialiazeAndValidate
         continueOnError: false
@@ -42,9 +42,9 @@ stages:
               provider: 'azurerm'
               command: 'validate'
 
-  - stage: Terraform-Plan-And-Deploy
-    condition: succeeded('Terraform-Initialiaze-and-validate')
-    dependsOn: Terraform-Initialiaze-and-validate
+  - stage: Terraform_Plan_And_Deploy
+    condition: succeeded('Terraform_Initialiaze_and_validate')
+    dependsOn: Terraform_Initialiaze_and_validate
     jobs:
       - job: TFPlanAndApply
         steps:
