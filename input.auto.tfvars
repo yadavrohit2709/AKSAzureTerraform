@@ -10,13 +10,13 @@ vnetcidr = ["10.0.0.0/24"]
 
 subnetcidr = ["10.0.0.0/25"]
 
-keyvault_rg = "aksdemo-rg"
+keyvault_rg = "PmAKS"
 
-keyvault_name = "aksdemocluster-kv"
+keyvault_name = "aks-psirht-kv"
 
-azure_region = "australiaeast"
+azure_region = "East US"
 
-resource_group = "aksdemocluster-rg"
+resource_group = "PmAKS"
 
 cluster_name = "aksdemocluster"
 
