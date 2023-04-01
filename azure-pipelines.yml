@@ -67,11 +67,13 @@ stages:
             inputs:
               provider: 'azurerm'
               command: 'plan'
+              commandOptions: "--var-file=input.auto.tfvars --out=tfplan"
               environmentServiceNameAzureRM: 'AzureServiceConnection'
           - task: TerraformTaskV4@4
             inputs:
               provider: 'azurerm'
               command: 'apply'
+              commandOptions: '--var-file=input.auto.tfvars'
               environmentServiceNameAzureRM: 'AzureServiceConnection'
 
 
