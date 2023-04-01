@@ -64,12 +64,14 @@ stages:
               backendAzureRmContainerName: '$(bkcontainer)'
               backendAzureRmKey: '$(bkstregkey)'
           - task: TerraformTaskV4@4
+            displayName: Terraform Plan
             inputs:
               provider: 'azurerm'
               command: 'plan'
-              commandOptions: "--var-file=input.auto.tfvars --out=tfplan"
+              commandOptions: "--var-file=input.auto.tfvars --input=false --out=tfplan"
               environmentServiceNameAzureRM: 'AzureServiceConnection'
           - task: TerraformTaskV4@4
+            displayName: Terraform Apply
             inputs:
               provider: 'azurerm'
               command: 'apply'
