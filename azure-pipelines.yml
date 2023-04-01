@@ -64,16 +64,17 @@ stages:
               backendAzureRmContainerName: '$(bkcontainer)'
               backendAzureRmKey: '$(bkstregkey)'
           - task: TerraformTaskV4@4
-            displayName: Terraform Plan
             inputs:
+              provider: 'azurerm'
               command: 'plan'
-              backendServiceArm: 'AzureServiceConnection'
-
+              environmentServiceNameAzureRM: 'AzureServiceConnection'
           - task: TerraformTaskV4@4
-            displayName: Terraform Apply
             inputs:
+              provider: 'azurerm'
               command: 'apply'
-              backendServiceArm: 'AzureServiceConnection'
+              environmentServiceNameAzureRM: 'AzureServiceConnection'
+
+
 
 
 
