@@ -1,19 +1,19 @@
-variable "bkstrgrg" {
+variable "BKSTRGRG" {
   type        = string
   description = "The name of the backend storage account resource group"
 }
 
-variable "bkstrg" {
+variable "BKSTRG" {
   type        = string
   description = "The name of the backend storage account"
 }
 
-variable "bkcontainer" {
+variable "BKCONTAINER" {
   type = string
   description = "The container name for the backend config"
 }
 
-variable "bkstrgkey" {
+variable "BKSTREGKEY" {
   type = string
   description = "The access key for the storage account"
 }
