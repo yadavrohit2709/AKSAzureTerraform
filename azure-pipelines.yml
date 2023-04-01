@@ -9,10 +9,10 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  bkstrgrg: 'PmAKS'
-  bkstrg: 'tfstate012060038838'
-  bkcontainer: 'tfstate'
-  bkstregkey: 'devpipeline.terraform.tfstate'
+  TF_VAR_BKSTRGRG: 'PmAKS'
+  TF_VAR_BKSTRG: 'tfstate012060038838'
+  TF_VAR_BKCONTAINER: 'tfstate'
+  TF_VAR_BKSTREGKEY: 'devpipeline.terraform.tfstate'
 
 stages:
   - stage: Terraform_Initialiaze_and_validate
@@ -31,10 +31,10 @@ stages:
               provider: 'azurerm'
               command: 'init'
               backendServiceArm: 'AzureServiceConnection'
-              backendAzureRmResourceGroupName: '$(bkstrgrg)'
-              backendAzureRmStorageAccountName: '$(bkstrg)'
-              backendAzureRmContainerName: '$(bkcontainer)'
-              backendAzureRmKey: '$(bkstregkey)'
+              backendAzureRmResourceGroupName: '$(TF_VAR_BKSTRGRG)'
+              backendAzureRmStorageAccountName: '$(TF_VAR_BKSTRG)'
+              backendAzureRmContainerName: '$(TF_VAR_BKCONTAINER)'
+              backendAzureRmKey: '$(TF_VAR_BKSTREGKEY)'
 
           - task: TerraformTaskV4@4
             displayName: Terraform Validate
@@ -58,11 +58,10 @@ stages:
             inputs:
               provider: 'azurerm'
               command: 'init'
-              backendServiceArm: 'AzureServiceConnection'
-              backendAzureRmResourceGroupName: '$(bkstrgrg)'
-              backendAzureRmStorageAccountName: '$(bkstrg)'
-              backendAzureRmContainerName: '$(bkcontainer)'
-              backendAzureRmKey: '$(bkstregkey)'
+              backendAzureRmResourceGroupName: '$(TF_VAR_BKSTRGRG)'
+              backendAzureRmStorageAccountName: '$(TF_VAR_BKSTRG)'
+              backendAzureRmContainerName: '$(TF_VAR_BKCONTAINER)'
+              backendAzureRmKey: '$(TF_VAR_BKSTREGKEY)'
           - task: TerraformTaskV4@4
             displayName: Terraform Plan
             inputs:
