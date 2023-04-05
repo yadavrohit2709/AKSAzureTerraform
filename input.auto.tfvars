@@ -30,5 +30,5 @@ agent_pools = {
       name            = "pool1"
       count           = 2
       vm_size         = "Standard_B2s"
-      os_disk_size_gb = "15"
+      os_disk_size_gb = "30"
     }
