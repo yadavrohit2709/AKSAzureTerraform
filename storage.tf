@@ -7,9 +7,8 @@ resource "azurerm_storage_account" "storage_account" {
   location                 = "eastus"
   account_tier             = "Standard"
   account_replication_type = "GRS"
-  enable_https_traffic_only = true
-  allow_blob_public_access = false
   min_tls_version          = "TLS1_2"
+  allow_blob_public_access = false
   
   network_rules {
     default_action = "Deny"
@@ -19,6 +18,16 @@ resource "azurerm_storage_account" "storage_account" {
   blob_properties {
     delete_retention_policy {
       days = 7
+    }
+  }
+
+  queue_properties {
+    logging {
+      delete = true
+      read = true
+      write = true
+      version = "1.0"
+      retention_policy_days = 7
     }
   }
 
@@ -37,15 +46,6 @@ resource "azurerm_storage_container" "storage_container" {
   name                  = "akslogs"
   storage_account_name  = azurerm_storage_account.storage_account.name
   container_access_type = "private"
-}
-
-# Enable logging for blob service
-resource "azurerm_storage_account_blob_container_shipping" "example" {
-  storage_account_id = azurerm_storage_account.storage_account.id
-  container_name     = azurerm_storage_container.storage_container.name
-  
-  log_level = "Information"
-  retention_days = 7
 }
 
 # Output for storage account name
