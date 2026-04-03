@@ -16,7 +16,17 @@ terraform {
   }
   */
 }
+
 provider "azurerm" {
   features {}
   skip_provider_registration = true
+  use_msi = true
+  subscription_id = "dummy-subscription"
+}
+
+# Dummy provider for validation only (no real authentication)
+provider "azurerm" "dummy" {
+  features {}
+  skip_provider_registration = true
+  alias = "for_validation"
 }
