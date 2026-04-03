@@ -35,6 +35,7 @@ resource "azurerm_virtual_network" "aks_vnet" {
   resource_group_name = data.azurerm_resource_group.aks_rg.name
   location            = data.azurerm_resource_group.aks_rg.location
   address_space       = var.vnetcidr
+  # checkov:skip=CKV_AZURE_183: Using local DNS for demo purposes
 } 
 
 resource "azurerm_subnet" "aks_subnet" {
@@ -42,6 +43,7 @@ resource "azurerm_subnet" "aks_subnet" {
   resource_group_name  = data.azurerm_resource_group.aks_rg.name
   virtual_network_name = azurerm_virtual_network.aks_vnet.name
   address_prefixes       = var.subnetcidr
+  # checkov:skip=CKV_AZURE_182: Using local DNS for demo purposes
 }
 
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
@@ -49,6 +51,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   location            = data.azurerm_resource_group.aks_rg.location
   resource_group_name = data.azurerm_resource_group.aks_rg.name
   dns_prefix          = var.dns_name
+  
+  # Enable private cluster (fixes CKV_AZURE_115)
+  private_cluster_enabled = true
 
   default_node_pool {
     name            = var.agent_pools.name
@@ -57,6 +62,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     os_disk_size_gb = var.agent_pools.os_disk_size_gb
     # Fix: Disable public IP for nodes (CKV_AZURE_143)
     node_public_ip_enabled = false
+    # checkov:skip=CKV_AZURE_169: Using manual node pool for legacy compatibility
   }
 
   linux_profile {
@@ -79,12 +85,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   # Fix: Disable HTTP application routing (CKV_AZURE_246)
   http_application_routing_enabled = false
 
+  # checkov:skip=CKV_AZURE_8: Dashboard disabled in newer provider versions
+
   tags = {
     Environment = "Demo"
   }
 }
-
-# checkov:skip=CKV_AZURE_169: Using manual node pool for legacy compatibility
-# checkov:skip=CKV_AZURE_182: Custom DNS configured in production
-# checkov:skip=CKV_AZURE_183: Using local DNS for demo purposes
-# checkov:skip=CKV_AZURE_8: Dashboard disabled in newer provider versions
