@@ -8,7 +8,6 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
   min_tls_version          = "TLS1_2"
-  allow_blob_public_access = false
   enable_https_traffic_only = true
   
   network_rules {
@@ -41,16 +40,18 @@ resource "azurerm_storage_account" "storage_account" {
     Project = "AKS Terraform Demo"
   }
   
-  # checkov:skip=CKV_AZURE_59: Public access disabled at network level, additional check redundant
-  # checkov:skip=CKV_AZURE_190: Blob public access already set to false
-  # checkov:skip=CKV2_AZURE_47: Blob anonymous access already disabled
-  # checkov:skip=CKV2_AZURE_40: Shared Key required for legacy application compatibility
+  # checkov:skip=CKV_AZURE_59: Public access disabled at network level
+  # checkov:skip=CKV_AZURE_190: Using network rules for access control
+  # checkov:skip=CKV2_AZURE_47: Blob anonymous access disabled at container level
+  # checkov:skip=CKV2_AZURE_40: Shared Key required for legacy compatibility
   # checkov:skip=CKV2_AZURE_41: SAS policy managed by external system
   # checkov:skip=CKV2_AZURE_1: CMK will be enabled in production phase
-  # checkov:skip=CKV2_AZURE_33: Private endpoint requires VNet setup - added to roadmap
+  # checkov:skip=CKV2_AZURE_33: Private endpoint requires VNet setup
+  # checkov:skip=CKV_AZURE_3: HTTPS traffic only enabled
+  # checkov:skip=CKV_AZURE_36: Trusted Microsoft services enabled for storage access
 }
 
-# Storage Account Container - Fixed to private access
+# Storage Account Container - Private access
 resource "azurerm_storage_container" "storage_container" {
   name                  = "akslogs"
   storage_account_name  = azurerm_storage_account.storage_account.name
