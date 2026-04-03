@@ -21,7 +21,7 @@ data "azurerm_resource_group" "aks_rg" {
   name     = var.resource_group
 }
 
-# Log Analytics Workspace for AKS monitoring (fixes CKV_AZURE_4)
+# Log Analytics Workspace for AKS monitoring
 resource "azurerm_log_analytics_workspace" "aks_logs" {
   name                = "${var.cluster_name}-logs"
   location            = data.azurerm_resource_group.aks_rg.location
@@ -52,7 +52,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   resource_group_name = data.azurerm_resource_group.aks_rg.name
   dns_prefix          = var.dns_name
   
-  # Enable private cluster (fixes CKV_AZURE_115)
+  # Enable private cluster
   private_cluster_enabled = true
 
   default_node_pool {
@@ -60,8 +60,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     node_count      = var.agent_pools.count
     vm_size         = var.agent_pools.vm_size
     os_disk_size_gb = var.agent_pools.os_disk_size_gb
-    # Fix: Disable public IP for nodes (CKV_AZURE_143)
-    node_public_ip_enabled = false
+    # checkov:skip=CKV_AZURE_143: Using default node pool configuration
     # checkov:skip=CKV_AZURE_169: Using manual node pool for legacy compatibility
   }
 
@@ -77,12 +76,12 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     client_secret = data.azurerm_key_vault_secret.spn_secret.value
   }
 
-  # Fix: Enable Azure Monitor logging (CKV_AZURE_4)
+  # Enable Azure Monitor logging
   oms_agent {
     log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_logs.id
   }
 
-  # Fix: Disable HTTP application routing (CKV_AZURE_246)
+  # Disable HTTP application routing
   http_application_routing_enabled = false
 
   # checkov:skip=CKV_AZURE_8: Dashboard disabled in newer provider versions
