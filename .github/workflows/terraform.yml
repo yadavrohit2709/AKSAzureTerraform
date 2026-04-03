@@ -80,20 +80,29 @@ jobs:
 
     - name: Create dummy tfvars
       run: |
-        echo 'aks_vnet_name = "aksvnet"' > dummy.tfvars
-        echo 'sshkvsecret = "sshkey"' >> dummy.tfvars
-        echo 'clientidkvsecret = "clientid"' >> dummy.tfvars
-        echo 'spnkvsecret = "secret"' >> dummy.tfvars
-        echo 'vnetcidr = ["10.0.0.0/24"]' >> dummy.tfvars
-        echo 'subnetcidr = ["10.0.0.0/25"]' >> dummy.tfvars
-        echo 'keyvault_rg = "rg"' >> dummy.tfvars
-        echo 'keyvault_name = "kv"' >> dummy.tfvars
-        echo 'resource_group = "rg"' >> dummy.tfvars
-        echo 'cluster_name = "cluster"' >> dummy.tfvars
-        echo 'dns_name = "dns"' >> dummy.tfvars
-        echo 'admin_username = "admin"' >> dummy.tfvars
-        echo 'kubernetes_version = "1.21"' >> dummy.tfvars
-        echo 'agent_pools = {name = "pool1", count = 1, vm_size = "Standard_B2s", os_disk_size_gb = "30"}' >> dummy.tfvars
+        cat > dummy.tfvars << 'EOF'
+        # Backend variables (not used in CI/CD without Azure)
+        BKSTRGRG = "dummy-rg"
+        BKSTRG = "dummy-storage"
+        BKCONTAINER = "dummy-container"
+        BKSTREGKEY = "dummy-key"
+        
+        # Main variables
+        aks_vnet_name = "aksvnet"
+        sshkvsecret = "sshkey"
+        clientidkvsecret = "clientid"
+        spnkvsecret = "secret"
+        vnetcidr = ["10.0.0.0/24"]
+        subnetcidr = ["10.0.0.0/25"]
+        keyvault_rg = "rg"
+        keyvault_name = "kv"
+        resource_group = "rg"
+        cluster_name = "cluster"
+        dns_name = "dns"
+        admin_username = "admin"
+        kubernetes_version = "1.21"
+        agent_pools = {name = "pool1", count = 1, vm_size = "Standard_B2s", os_disk_size_gb = "30"}
+        EOF
 
     - name: Terraform Plan
       run: terraform plan -no-color -input=false -var-file=dummy.tfvars
