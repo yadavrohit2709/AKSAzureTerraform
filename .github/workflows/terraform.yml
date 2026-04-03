@@ -27,7 +27,7 @@ jobs:
         terraform_version: 1.5.0
 
     - name: Terraform Init
-      run: terraform init -backend=false
+      run: terraform init -backend=false -input=false
 
     - name: Terraform Validate
       run: terraform validate
@@ -75,7 +75,7 @@ jobs:
         terraform_version: 1.5.0
 
     - name: Terraform Init
-      run: terraform init -backend=false
+      run: terraform init -backend=false -input=false
 
     - name: Terraform Plan
-      run: terraform plan -no-color
+      run: terraform plan -no-color -input=false
