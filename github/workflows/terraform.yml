@@ -5,6 +5,13 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  # Enable manual triggering
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
 
 # NOTE: This pipeline runs validation and plan ONLY - no actual deployment
 # To enable apply, add Azure credentials as secrets and uncomment the apply job
