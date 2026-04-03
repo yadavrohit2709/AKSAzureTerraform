@@ -5,16 +5,7 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  # Enable manual triggering
   workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'warning'
-
-# NOTE: This pipeline runs validation and plan ONLY - no actual deployment
-# To enable apply, add Azure credentials as secrets and uncomment the apply job
 
 jobs:
   terraform-validate:
@@ -76,8 +67,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [terraform-validate, checkov-security-scan]
     
-    # This job runs WITHOUT Azure credentials - just shows the plan
-    # It demonstrates what changes would be made without actually deploying
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -90,24 +79,5 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Terraform Plan (No Azure Credentials Required)
-      # Running plan without Azure credentials to show what WOULD happen
-      # This is useful for demo/validation purposes without cloud access
-      run: |
-        # Create a mock backend config for local planning
-        # This shows the plan without connecting to Azure
-        terraform plan -no-color -out=tfplan
-      env:
-        # These are not required for plan-only (just for documentation)
-        # terraform will use the backend config from provider.tf
-        ARM_CLIENT_ID: ""
-        ARM_CLIENT_SECRET: ""
-        ARM_SUBSCRIPTION_ID: ""
-        ARM_TENANT_ID: ""
-
-    - name: Upload Plan Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: terraform-plan
-        path: tfplan
-        retention-days: 30
+    - name: Terraform Plan
+      run: terraform plan -no-color
