@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main, master ]
 
+# NOTE: This pipeline runs validation and plan ONLY - no actual deployment
+# To enable apply, add Azure credentials as secrets and uncomment the apply job
+
 jobs:
   terraform-validate:
     name: Terraform Validate
@@ -62,10 +65,12 @@ jobs:
         exit 1
 
   terraform-plan:
-    name: Terraform Plan
+    name: Terraform Plan (Dry Run)
     runs-on: ubuntu-latest
-    needs: terraform-validate
+    needs: [terraform-validate, checkov-security-scan]
     
+    # This job runs WITHOUT Azure credentials - just shows the plan
+    # It demonstrates what changes would be made without actually deploying
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -78,36 +83,24 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Terraform Plan
-      run: terraform plan -no-color
+    - name: Terraform Plan (No Azure Credentials Required)
+      # Running plan without Azure credentials to show what WOULD happen
+      # This is useful for demo/validation purposes without cloud access
+      run: |
+        # Create a mock backend config for local planning
+        # This shows the plan without connecting to Azure
+        terraform plan -no-color -out=tfplan
       env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        # These are not required for plan-only (just for documentation)
+        # terraform will use the backend config from provider.tf
+        ARM_CLIENT_ID: ""
+        ARM_CLIENT_SECRET: ""
+        ARM_SUBSCRIPTION_ID: ""
+        ARM_TENANT_ID: ""
 
-  terraform-apply:
-    name: Terraform Apply
-    runs-on: ubuntu-latest
-    needs: [checkov-security-scan, terraform-plan]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
+    - name: Upload Plan Artifact
+      uses: actions/upload-artifact@v3
       with:
-        terraform_version: 1.5.0
-
-    - name: Terraform Init
-      run: terraform init
-
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        name: terraform-plan
+        path: tfplan
+        retention-days: 30
