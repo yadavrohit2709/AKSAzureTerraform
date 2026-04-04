@@ -20,5 +20,19 @@ terraform {
 provider "azurerm" {
   features {}
   skip_provider_registration = true
+  
+  # Use client secret or service principal in CI/CD
+  # For GitHub Actions, use ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID, ARM_SUBSCRIPTION_ID
+  # Or use managed identity (MSI) if available
   use_msi = true
+  
+  # Skip validation when no credentials available
+  skip_credentials_validation = true
 }
+
+# Environment variables for Azure provider
+# Set these in GitHub Actions secrets:
+# - ARM_CLIENT_ID
+# - ARM_CLIENT_SECRET  
+# - ARM_TENANT_ID
+# - ARM_SUBSCRIPTION_ID
