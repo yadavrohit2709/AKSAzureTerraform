@@ -8,9 +8,6 @@ resource "azurerm_storage_account" "storage_account_backup" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
   
-  # SECURITY FIX: Public access disabled
-  allow_blob_public_access = false
-  
   # SECURITY FIX: TLS 1.2 minimum
   min_tls_version          = "TLS1_2"
   
