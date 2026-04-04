@@ -1,5 +1,5 @@
 # Storage Account for AKS Cluster
-# Backup configuration - Updated for new deployment requirements
+# Backup configuration - Updated with security fixes
 
 resource "azurerm_storage_account" "storage_account" {
   name                     = "aksstorageaccountdemo"
@@ -8,16 +8,20 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
   
-  # VULNERABILITY: Public access enabled - needs to be disabled for production
-  allow_blob_public_access = true
+  # SECURITY FIX: Public access disabled
+  allow_blob_public_access = false
   
-  # VULNERABILITY: Weak TLS version - should use TLS1_2
-  min_tls_version          = "TLS1_0"
+  # SECURITY FIX: TLS 1.2 minimum
+  min_tls_version          = "TLS1_2"
   
-  # VULNERABILITY: Network rules allow public access
+  # SECURITY FIX: Network rules deny by default
   network_rules {
-    default_action = "Allow"
+    default_action = "Deny"
+    bypass = ["AzureServices"]
   }
+  
+  # SECURITY FIX: Enable HTTPS only
+  enable_https_traffic_only = true
   
   blob_properties {
     delete_retention_policy {
@@ -34,7 +38,8 @@ resource "azurerm_storage_account" "storage_account" {
 resource "azurerm_storage_container" "storage_container" {
   name                  = "akslogs"
   storage_account_name = azurerm_storage_account.storage_account.name
-  container_access_type = "blob"  # VULNERABILITY: Public blob access
+  # SECURITY FIX: Private access instead of blob
+  container_access_type = "private"
 }
 
 output "storage_account_name" {
