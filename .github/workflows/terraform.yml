@@ -26,9 +26,9 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Create minimal provider for CI
+    - name: Create provider config for CI
       run: |
-        cat > provider_ci.tf <<'EOF'
+        cat > provider_ci.tf <<EOF
 terraform {
   required_providers {
     azurerm = {
@@ -44,15 +44,12 @@ provider "azurerm" {
   skip_credentials_validation = true
 }
 EOF
-      shell: bash
 
     - name: Terraform Init
       run: terraform init -backend=false -input=false
-      shell: bash
 
     - name: Terraform Validate
       run: terraform validate
-      shell: bash
 
   checkov-security-scan:
     name: Checkov Security Scan
