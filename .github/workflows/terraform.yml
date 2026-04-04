@@ -6,28 +6,19 @@ on:
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
-    inputs:
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'warning'
 
 jobs:
-  terraform-validate:
+  terraform:
     name: Terraform Validate
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v3
+    - uses: actions/checkout@v4
+    - uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.5.0
-
-    - name: Create provider config for CI
+    - name: Create provider config
       run: |
-        cat > provider_ci.tf <<EOF
+        cat > provider_ci.tf <<'EOF'
 terraform {
   required_providers {
     azurerm = {
@@ -36,43 +27,28 @@ terraform {
     }
   }
 }
-
 provider "azurerm" {
   features {}
   skip_provider_registration = true
   skip_credentials_validation = true
 }
 EOF
-
     - name: Terraform Init
       run: terraform init -backend=false -input=false
-
     - name: Terraform Validate
       run: terraform validate
-
-  checkov-security-scan:
+  checkov:
     name: Checkov Security Scan
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    continue-on-error: true
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Run Checkov Security Scan
-      id: checkov
-      uses: bridgecrewio/checkov-action@master
+    - uses: actions/checkout@v4
+    - uses: bridgecrewio/checkov-action@master
       with:
         directory: .
         framework: terraform
         output_format: sarif
         output_file_path: checkov-results.sarif
         soft_fail: true
-
-    - name: Upload Checkov SARIF file
-      uses: github/codeql-action/upload-sarif@v2
+    - uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: checkov-results.sarif
