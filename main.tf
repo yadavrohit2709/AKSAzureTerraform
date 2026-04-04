@@ -35,15 +35,46 @@ resource "azurerm_virtual_network" "aks_vnet" {
   resource_group_name = data.azurerm_resource_group.aks_rg.name
   location            = data.azurerm_resource_group.aks_rg.location
   address_space       = var.vnetcidr
-  # checkov:skip=CKV_AZURE_183: Using local DNS for demo purposes
-} 
+}
+
+# Network Security Group for subnet
+resource "azurerm_network_security_group" "aks_nsg" {
+  name                = "aks-nsg"
+  location            = data.azurerm_resource_group.aks_rg.location
+  resource_group_name = data.azurerm_resource_group.aks_rg.name
+
+  security_rule {
+    name                       = "AllowHTTPS"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_ranges    = ["443", "80"]
+    source_address_prefix       = "*"
+    destination_address_prefix  = "*"
+  }
+}
 
 resource "azurerm_subnet" "aks_subnet" {
   name                 = "aks_subnet"
   resource_group_name  = data.azurerm_resource_group.aks_rg.name
   virtual_network_name = azurerm_virtual_network.aks_vnet.name
-  address_prefixes       = var.subnetcidr
-  # checkov:skip=CKV_AZURE_182: Using local DNS for demo purposes
+  address_prefixes     = var.subnetcidr
+
+  delegation {
+    name = "aksdelegation"
+    service_delegation {
+      name    = "Microsoft.ContainerService/managedClusters"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+    }
+  }
+}
+
+# Associate NSG with subnet
+resource "azurerm_subnet_network_security_group_association" "aks_nsg_assoc" {
+  subnet_id                 = azurerm_subnet.aks_subnet.id
+  network_security_group_id = azurerm_network_security_group.aks_nsg.id
 }
 
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
@@ -54,14 +85,19 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   
   # Enable private cluster
   private_cluster_enabled = true
+  private_dns_zone_id    = "System"
+
+  # RBAC enabled
+  role_based_access_control_enabled = true
 
   default_node_pool {
     name            = var.agent_pools.name
     node_count      = var.agent_pools.count
     vm_size         = var.agent_pools.vm_size
     os_disk_size_gb = var.agent_pools.os_disk_size_gb
-    # checkov:skip=CKV_AZURE_143: Using default node pool configuration
-    # checkov:skip=CKV_AZURE_169: Using manual node pool for legacy compatibility
+    type            = "VirtualMachineScaleSets"
+    os_disk_type    = "Managed"
+    max_pods        = 50
   }
 
   linux_profile {
@@ -84,7 +120,34 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   # Disable HTTP application routing
   http_application_routing_enabled = false
 
-  # checkov:skip=CKV_AZURE_8: Dashboard disabled in newer provider versions
+  # Network policy
+  network_profile {
+    network_plugin     = "azure"
+    network_policy    = "calico"
+    load_balancer_sku = "standard"
+  }
+
+  # SKU and SLA
+  sku_tier = "Standard"
+
+  # Azure Policy add-on
+  azure_policy_enabled = true
+
+  # Secret store CSI driver
+  key_vault_secrets_provider {
+    secret_rotation_enabled = "true"
+  }
+
+  # Disable local admin
+  admin_ssh_key {
+    username  = var.admin_username
+    key_data  = data.azurerm_key_vault_secret.ssh_public_key.value
+  }
+
+  # API Server authorized IP ranges (restrict to VNet)
+  api_server_authorized_ip_ranges = [
+    azurerm_virtual_network.aks_vnet.address_space[0]
+  ]
 
   tags = {
     Environment = "Demo"
