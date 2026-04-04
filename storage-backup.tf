@@ -1,8 +1,8 @@
-# Storage Account for AKS Cluster
+# Storage Account Backup for AKS Cluster
 # Backup configuration - Updated with security fixes
 
-resource "azurerm_storage_account" "storage_account" {
-  name                     = "aksstorageaccountdemo"
+resource "azurerm_storage_account" "storage_account_backup" {
+  name                     = "aksstorageaccountbackup"
   resource_group_name      = "demo-resource-group"
   location                 = "eastus"
   account_tier             = "Standard"
@@ -32,20 +32,21 @@ resource "azurerm_storage_account" "storage_account" {
   tags = {
     Environment = "Demo"
     Project = "AKS Terraform Demo"
+    Backup = "true"
   }
 }
 
-resource "azurerm_storage_container" "storage_container" {
-  name                  = "akslogs"
-  storage_account_name = azurerm_storage_account.storage_account.name
+resource "azurerm_storage_container" "storage_container_backup" {
+  name                  = "akslogsbackup"
+  storage_account_name = azurerm_storage_account.storage_account_backup.name
   # SECURITY FIX: Private access instead of blob
   container_access_type = "private"
 }
 
-output "storage_account_name" {
-  value = azurerm_storage_account.storage_account.name
+output "storage_account_backup_name" {
+  value = azurerm_storage_account.storage_account_backup.name
 }
 
-output "storage_account_endpoint" {
-  value = azurerm_storage_account.storage_account.primary_blob_endpoint
+output "storage_account_backup_endpoint" {
+  value = azurerm_storage_account.storage_account_backup.primary_blob_endpoint
 }
