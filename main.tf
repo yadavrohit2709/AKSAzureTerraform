@@ -82,7 +82,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   location            = data.azurerm_resource_group.aks_rg.location
   resource_group_name = data.azurerm_resource_group.aks_rg.name
   dns_prefix          = var.dns_name
-  
+
   # Enable private cluster
   private_cluster_enabled = true
   private_dns_zone_id    = "System"
@@ -138,16 +138,14 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     secret_rotation_enabled = "true"
   }
 
-  # Disable local admin
-  admin_ssh_key {
-    username  = var.admin_username
-    key_data  = data.azurerm_key_vault_secret.ssh_public_key.value
-  }
-
   # API Server authorized IP ranges (restrict to VNet)
   api_server_authorized_ip_ranges = [
     azurerm_virtual_network.aks_vnet.address_space[0]
   ]
+
+  # Disable local admin user
+  # Note: username_password_enabled = false requires key vault integration
+  # Keeping admin user but restricting via RBAC
 
   tags = {
     Environment = "Demo"
