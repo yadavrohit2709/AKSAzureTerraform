@@ -60,9 +60,11 @@ resource "azurerm_storage_container" "storage_container_backup" {
 }
 
 output "storage_account_backup_name" {
-  value = azurerm_storage_account.storage_account_backup.name
+  description = "Name of the backup storage account"
+  value       = azurerm_storage_account.storage_account_backup.name
 }
 
 output "storage_account_backup_endpoint" {
-  value = azurerm_storage_account.storage_account_backup.primary_blob_endpoint
+  description = "Primary blob endpoint of the backup storage account"
+  value       = azurerm_storage_account.storage_account_backup.primary_blob_endpoint
 }
