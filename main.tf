@@ -51,14 +51,14 @@ resource "azurerm_network_security_group" "aks_nsg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_ranges    = ["443", "80"]
-    source_address_prefix       = "*"
-    destination_address_prefix  = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
   }
 }
 
 resource "azurerm_subnet" "aks_subnet" {
   name                 = "aks_subnet"
-  resource_group_name  = data.azurerm_resource_group.aks_rg.name
+  resource_group_name = data.azurerm_resource_group.aks_rg.name
   virtual_network_name = azurerm_virtual_network.aks_vnet.name
   address_prefixes     = var.subnetcidr
 
@@ -127,8 +127,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     load_balancer_sku = "standard"
   }
 
-  # SKU and SLA
-  sku_tier = "Standard"
+  # SKU - Paid tier for SLA
+  sku_tier = "Paid"
 
   # Azure Policy add-on
   azure_policy_enabled = true
@@ -142,10 +142,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   api_server_authorized_ip_ranges = [
     azurerm_virtual_network.aks_vnet.address_space[0]
   ]
-
-  # Disable local admin user
-  # Note: username_password_enabled = false requires key vault integration
-  # Keeping admin user but restricting via RBAC
 
   tags = {
     Environment = "Demo"
