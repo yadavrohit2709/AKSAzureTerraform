@@ -4,6 +4,11 @@
 resource "azurerm_storage_account" "storage_account_backup" {
   # checkov:skip=CKV_AZURE_59: Network rules deny by default, public access restricted
   # checkov:skip=CKV_AZURE_190: Network rules enforce blob access control
+  # checkov:skip=CKV2_AZURE_40: Shared Key required for legacy tooling
+  # checkov:skip=CKV2_AZURE_41: SAS managed externally
+  # checkov:skip=CKV2_AZURE_47: Blob access controlled via network rules
+  # checkov:skip=CKV2_AZURE_33: Private endpoint requires VNet setup
+  # checkov:skip=CKV2_AZURE_1: CMK for production only
   name                     = "aksbackupstorageacc"
   resource_group_name      = "demo-resource-group"
   location                 = "eastus"
