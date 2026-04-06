@@ -18,8 +18,7 @@ resource "azurerm_storage_account" "demo_storage" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
   min_tls_version          = "TLS1_2"
-  # HTTPS enforced at application level
-  # enable_https_traffic_only = true
+  enable_https_traffic_only = true
 
   # Network rules - deny by default
   network_rules {
@@ -52,6 +51,7 @@ resource "azurerm_storage_account" "demo_storage" {
   tags = {
     Environment = "Demo"
     Project = "AKS Terraform Demo"
+    Backup = "true"
   }
 }
 
