@@ -41,10 +41,12 @@ resource "azurerm_storage_container" "demo_container" {
   container_access_type = "private"  # FIXED: Private access
 }
 
-output "storage_account_name" {
+output "demo_storage_account_name" {
+  description = "Name of the demo storage account"
   value = azurerm_storage_account.demo_storage.name
 }
 
-output "storage_account_endpoint" {
+output "demo_storage_account_endpoint" {
+  description = "Primary blob endpoint of the demo storage account"
   value = azurerm_storage_account.demo_storage.primary_blob_endpoint
 }
