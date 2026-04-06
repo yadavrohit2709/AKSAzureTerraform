@@ -1,5 +1,5 @@
-# Storage Account for AKS Cluster - DEMO WITH VULNERABILITIES
-# This file contains intentional security vulnerabilities for demonstration
+# Storage Account for AKS Cluster - FIXED
+# Security vulnerabilities have been addressed
 
 resource "azurerm_storage_account" "demo_storage" {
   name                     = "aksstorageaccountdemo"
@@ -8,15 +8,19 @@ resource "azurerm_storage_account" "demo_storage" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
   
-  # VULNERABILITY: Public access enabled - needs to be disabled for production
-  allow_blob_public_access = true
+  # FIXED: Public access disabled
+  allow_blob_public_access = false
   
-  # VULNERABILITY: Weak TLS version - should use TLS1_2
-  min_tls_version          = "TLS1_0"
+  # FIXED: TLS 1.2 enforced
+  min_tls_version          = "TLS1_2"
   
-  # VULNERABILITY: Network rules allow public access
+  # FIXED: Enable HTTPS only
+  enable_https_traffic_only = true
+  
+  # FIXED: Network rules deny by default
   network_rules {
-    default_action = "Allow"
+    default_action = "Deny"
+    bypass = ["AzureServices"]
   }
   
   blob_properties {
@@ -34,7 +38,7 @@ resource "azurerm_storage_account" "demo_storage" {
 resource "azurerm_storage_container" "demo_container" {
   name                  = "akslogs"
   storage_account_name = azurerm_storage_account.demo_storage.name
-  container_access_type = "blob"  # VULNERABILITY: Public blob access
+  container_access_type = "private"  # FIXED: Private access
 }
 
 output "storage_account_name" {
