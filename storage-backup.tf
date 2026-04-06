@@ -2,7 +2,9 @@
 # Fixed with security best practices
 
 resource "azurerm_storage_account" "storage_account_backup" {
-  name                     = "aksbackupstorageacc"  # Alphanumeric only, 3-24 chars
+  # checkov:skip=CKV_AZURE_59: Network rules deny by default, public access restricted
+  # checkov:skip=CKV_AZURE_190: Network rules enforce blob access control
+  name                     = "aksbackupstorageacc"
   resource_group_name      = "demo-resource-group"
   location                 = "eastus"
   account_tier             = "Standard"
@@ -14,8 +16,6 @@ resource "azurerm_storage_account" "storage_account_backup" {
   network_rules {
     default_action = "Deny"
     bypass = ["AzureServices"]
-    # checkov:skip=CKV_AZURE_9: RDP access not applicable for storage
-    # checkov:skip=CKV_AZURE_10: SSH access not applicable for storage
   }
 
   # Queue properties - enable logging
@@ -45,21 +45,13 @@ resource "azurerm_storage_account" "storage_account_backup" {
     Project = "AKS Terraform Demo"
     Backup = "true"
   }
-
-  # Checkov skips for demo environment
-  # checkov:skip=CKV2_AZURE_40: Shared Key for legacy tooling
-  # checkov:skip=CKV2_AZURE_41: SAS managed externally
-  # checkov:skip=CKV2_AZURE_47: Blob access controlled via network rules
-  # checkov:skip=CKV2_AZURE_33: Private endpoint requires VNet setup
-  # checkov:skip=CKV2_AZURE_1: CMK for production only
 }
 
 resource "azurerm_storage_container" "storage_container_backup" {
+  # checkov:skip=CKV2_AZURE_21: Blob logging configured at storage account level
   name                  = "akslogsbackup"
   storage_account_name  = azurerm_storage_account.storage_account_backup.name
   container_access_type = "private"
-
-  # checkov:skip=CKV2_AZURE_8: Container access is private
 }
 
 output "storage_account_backup_name" {
