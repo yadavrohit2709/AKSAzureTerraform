@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.15.00"
+      version = "~> 3.116"
     }
   }  
   # Commented out for CI/CD without Azure credentials
