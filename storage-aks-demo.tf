@@ -1,6 +1,6 @@
-# Storage Account for AKS Cluster - DEMO WITH VULNERABILITIES
-# This file contains intentional security vulnerabilities for demonstration
-# Compatible with azurerm provider version 3.15.00
+# Storage Account for AKS Cluster - SECURE VERSION
+# Security vulnerabilities have been fixed
+# This is the remediated version for Checkov security demo
 
 resource "azurerm_storage_account" "aks_aksdemo_storage" {
   name                     = "aksaksdemostorage001"
@@ -9,12 +9,27 @@ resource "azurerm_storage_account" "aks_aksdemo_storage" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
   
-  # VULNERABILITY: Weak TLS version - should use TLS1_2
-  min_tls_version          = "TLS1_0"
+  # FIXED: Using TLS1_2 instead of TLS1_0 (CKV_AZURE_44)
+  min_tls_version          = "TLS1_2"
   
-  # VULNERABILITY: Network rules allow public access
+  # FIXED: HTTPS traffic only enabled (CKV_AZURE_3)
+  enable_https_traffic_only = true
+  
+  # FIXED: Network rules deny public access (CKV_AZURE_59, CKV_AZURE_35)
   network_rules {
-    default_action = "Allow"
+    default_action = "Deny"
+    bypass = ["AzureServices"]
+  }
+  
+  # Queue properties with logging enabled (CKV_AZURE_33)
+  queue_properties {
+    logging {
+      delete = true
+      read = true
+      write = true
+      version = "1.0"
+      retention_policy_days = 7
+    }
   }
   
   blob_properties {
@@ -32,7 +47,7 @@ resource "azurerm_storage_account" "aks_aksdemo_storage" {
 resource "azurerm_storage_container" "aks_aksdemo_container" {
   name                  = "akslogs"
   storage_account_name = azurerm_storage_account.aks_aksdemo_storage.name
-  container_access_type = "blob"  # VULNERABILITY: Public blob access
+  container_access_type = "private"  # FIXED: Private access (CKV_AZURE_190, CKV_AZURE_34)
 }
 
 output "aks_storage_account_name" {
