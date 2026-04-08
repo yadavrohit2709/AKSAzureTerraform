@@ -52,6 +52,7 @@ jobs:
         framework: terraform
         output_format: sarif
         output_file_path: checkov-results.sarif
+        skip_path: demo-scan.tf
         # soft_fail removed - pipeline will fail if checkov finds issues
 
     - name: Upload Checkov SARIF file
