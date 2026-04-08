@@ -76,14 +76,6 @@ resource "azurerm_virtual_machine" "demo_vuln_vm" {
   }
 }
 
-# SSH Key for VM authentication
-resource "azurerm_ssh_public_key" "demo_key" {
-  name               = "demo-ssh-key"
-  location           = azurerm_resource_group.demo.location
-  resource_group_name = azurerm_resource_group.demo.name
-  public_key         = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC9example1234567890abcdefghijklmnopqrstuvwxyz"
-}
-
 # Network interface for VM
 resource "azurerm_network_interface" "demo_nic" {
   name                = "demo-vuln-nic"
@@ -105,31 +97,12 @@ resource "azurerm_virtual_network" "demo_vnet" {
   resource_group_name = azurerm_resource_group.demo.name
 }
 
-# Subnet with network security group
+# Subnet
 resource "azurerm_subnet" "demo_subnet" {
   name                 = "demo-subnet"
   resource_group_name  = azurerm_resource_group.demo.name
   virtual_network_name = azurerm_virtual_network.demo_vnet.name
   address_prefixes     = ["10.0.1.0/24"]
-}
-
-# Network Security Group
-resource "azurerm_network_security_group" "demo_nsg" {
-  name                = "demo-nsg"
-  location            = azurerm_resource_group.demo.location
-  resource_group_name = azurerm_resource_group.demo.name
-
-  security_rule {
-    name                       = "AllowManagement"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_ranges    = ["22", "3389"]
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
 }
 
 # -----------------------------------------------------------------------------
@@ -248,13 +221,13 @@ resource "random_string" "kv_name" {
 # | Check ID      | Resource Type              | Fix Applied                           |
 # |---------------|----------------------------|----------------------------------------|
 # | CKV_AZURE_35  | azurerm_storage_account    | Public blob access disabled            |
-# | CKV_AZURE_44  | azurerm_storage_account    | TLS 1.2 enforced                      |
-# | CKV_AZURE_149 | azurerm_storage_account    | Large file shares disabled              |
-# | CKV_AZURE_3   | azurerm_virtual_machine    | StandardSSD_LRS for encryption          |
-# | CKV_AZURE_109 | azurerm_virtual_machine    | SSH key auth enabled, password removed |
-# | CKV_AZURE_109 | azurerm_mssql_server      | Password removed, use Key Vault        |
-# | CKV_AZURE_117 | azurerm_mssql_server      | Public network access disabled         |
-# | CKV_AZURE_117 | azurerm_cosmosdb_account  | Public network access disabled         |
-# | CKV_AZURE_33  | azurerm_key_vault         | Network ACLs deny by default           |
+# | CKV_AZURE_44  | azurerm_storage_account   | TLS 1.2 enforced                      |
+# | CKV_AZURE_149 | azurerm_storage_account   | Large file shares disabled              |
+# | CKV_AZURE_3   | azurerm_virtual_machine   | StandardSSD_LRS for encryption          |
+# | CKV_AZURE_109 | azurerm_virtual_machine   | SSH key auth enabled, password removed |
+# | CKV_AZURE_109 | azurerm_mssql_server     | Password removed, use Key Vault        |
+# | CKV_AZURE_117 | azurerm_mssql_server     | Public network access disabled         |
+# | CKV_AZURE_117 | azurerm_cosmosdb_account | Public network access disabled          |
+# | CKV_AZURE_33  | azurerm_key_vault        | Network ACLs deny by default          |
 #
 # =============================================================================
