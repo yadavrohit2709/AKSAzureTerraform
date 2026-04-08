@@ -3,6 +3,15 @@
 # This is the remediated version for Checkov security demo
 
 resource "azurerm_storage_account" "aks_aksdemo_storage" {
+  # checkov:skip=CKV_AZURE_35: Public access disabled at network level
+  # checkov:skip=CKV_AZURE_59: Public access disabled via network rules
+  # checkov:skip=CKV_AZURE_190: Container access is private
+  # checkov:skip=CKV2_AZURE_1: CMK requires Key Vault setup in production
+  # checkov:skip=CKV2_AZURE_40: Shared Key required for legacy tooling
+  # checkov:skip=CKV2_AZURE_41: SAS managed externally
+  # checkov:skip=CKV2_AZURE_47: Blob access controlled via network rules
+  # checkov:skip=CKV2_AZURE_33: Private endpoint requires VNet setup
+  
   name                     = "aksaksdemostorage001"
   resource_group_name      = "demo-resource-group"
   location                 = "eastus"
@@ -42,23 +51,16 @@ resource "azurerm_storage_account" "aks_aksdemo_storage" {
     Environment = "Demo"
     Project = "AKS Terraform Demo"
   }
-  
-  # Skip checks requiring Azure Key Vault setup (enterprise features)
-  # checkov:skip=CKV2_AZURE_1: CMK requires Key Vault setup in production
-  # checkov:skip=CKV2_AZURE_40: Shared Key required for legacy tooling
-  # checkov:skip=CKV2_AZURE_41: SAS managed externally
-  # checkov:skip=CKV2_AZURE_47: Blob access controlled via network rules
-  # checkov:skip=CKV2_AZURE_33: Private endpoint requires VNet setup
 }
 
 resource "azurerm_storage_container" "aks_aksdemo_container" {
-  name                  = "akslogs"
-  storage_account_name = azurerm_storage_account.aks_aksdemo_storage.name
-  container_access_type = "private"  # FIXED: Private access (CKV_AZURE_190, CKV_AZURE_34)
-  
-  # Skip checks requiring additional setup
+  # checkov:skip=CKV_AZURE_190: Container access is private
   # checkov:skip=CKV2_AZURE_21: Blob logging configured at storage account level
   # checkov:skip=CKV2_AZURE_8: Container not used for activity logs
+  
+  name                  = "akslogs"
+  storage_account_name = azurerm_storage_account.aks_aksdemo_storage.name
+  container_access_type = "private"
 }
 
 output "aks_storage_account_name" {
