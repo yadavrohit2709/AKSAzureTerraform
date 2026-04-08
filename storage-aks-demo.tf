@@ -1,5 +1,6 @@
 # Storage Account for AKS Cluster - DEMO WITH VULNERABILITIES
 # This file contains intentional security vulnerabilities for demonstration
+# Compatible with azurerm provider version 3.15.00
 
 resource "azurerm_storage_account" "aks_aksdemo_storage" {
   name                     = "aksaksdemostorage001"
@@ -7,9 +8,6 @@ resource "azurerm_storage_account" "aks_aksdemo_storage" {
   location                 = "eastus"
   account_tier             = "Standard"
   account_replication_type = "GRS"
-  
-  # VULNERABILITY: Public access enabled - needs to be disabled for production
-  allow_blob_public_access = true
   
   # VULNERABILITY: Weak TLS version - should use TLS1_2
   min_tls_version          = "TLS1_0"
