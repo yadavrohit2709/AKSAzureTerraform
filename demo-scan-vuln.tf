@@ -5,7 +5,7 @@
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# Storage Account with Security Vulnerabilities
+# DEMO: Storage Account with Security Vulnerabilities
 # -----------------------------------------------------------------------------
 resource "azurerm_storage_account" "demo_vuln_storage" {
   name                     = "demovulnstorage${random_string.storage_name.result}"
@@ -43,7 +43,7 @@ resource "random_string" "storage_name" {
 }
 
 # -----------------------------------------------------------------------------
-# Virtual Machine with Security Vulnerabilities
+# DEMO: Virtual Machine with Security Vulnerabilities
 # -----------------------------------------------------------------------------
 resource "azurerm_virtual_machine" "demo_vuln_vm" {
   name                  = "demo-vuln-vm"
@@ -56,7 +56,7 @@ resource "azurerm_virtual_machine" "demo_vuln_vm" {
     name              = "demo-vuln-os-disk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"  # SECURITY VULNERABILITY: Unencrypted disk
+    managed_disk_type = "Standard_LRS"  # SECURITY VULNERABILITY: Unencrypted disk (not Premium or StandardSSD)
   }
 
   storage_image_reference {
@@ -88,7 +88,6 @@ resource "azurerm_network_interface" "demo_nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.demo_subnet.id
     private_ip_address_allocation = "dynamic"
-    # SECURITY VULNERABILITY: No public IP but exposed to public subnet
   }
 }
 
@@ -109,7 +108,7 @@ resource "azurerm_subnet" "demo_subnet" {
 }
 
 # -----------------------------------------------------------------------------
-# SQL Server with Security Vulnerabilities
+# DEMO: SQL Server with Security Vulnerabilities
 # -----------------------------------------------------------------------------
 resource "azurerm_mssql_server" "demo_vuln_sql" {
   name                         = "demo-vuln-sql-${random_string.sql_name.result}"
@@ -120,13 +119,7 @@ resource "azurerm_mssql_server" "demo_vuln_sql" {
   # SECURITY VULNERABILITY: Hardcoded password
   administrator_login_password = "P@ssw0rd123!Test"
   
-  # SECURITY VULNERABILITY: Public network access enabled
-  public_network_access_enabled = true
-  
-  # SECURITY VULNERABILITY: No threat detection
-  threat_detection_policy {
-    enabled = false
-  }
+  # SECURITY VULNERABILITY: Public network access enabled (default behavior in older versions)
 }
 
 resource "random_string" "sql_name" {
@@ -142,7 +135,7 @@ resource "azurerm_mssql_database" "demo_db" {
 }
 
 # -----------------------------------------------------------------------------
-# Cosmos DB Account with Security Vulnerabilities
+# DEMO: Cosmos DB Account with Security Vulnerabilities
 # -----------------------------------------------------------------------------
 resource "azurerm_cosmosdb_account" "demo_vuln_cosmos" {
   name                = "demo-vuln-cosmos-${random_string.cosmos_name.result}"
@@ -156,8 +149,7 @@ resource "azurerm_cosmosdb_account" "demo_vuln_cosmos" {
   }
 
   consistency_policy {
-    level               = "Session"
-    consistency_interval = 10
+    default_consistency_level = "Session"
   }
 
   geo_location {
@@ -167,9 +159,6 @@ resource "azurerm_cosmosdb_account" "demo_vuln_cosmos" {
 
   # SECURITY VULNERABILITY: Public network access enabled
   public_network_access_enabled = true
-  
-  # SECURITY VULNERABILITY: Metadata write access enabled
-  is_virtual_network_filter_enabled = false
 }
 
 resource "random_string" "cosmos_name" {
@@ -179,7 +168,7 @@ resource "random_string" "cosmos_name" {
 }
 
 # -----------------------------------------------------------------------------
-# Key Vault with Security Vulnerabilities
+# DEMO: Key Vault with Security Vulnerabilities
 # -----------------------------------------------------------------------------
 resource "azurerm_key_vault" "demo_vuln_kv" {
   name                        = "demo-vuln-kv-${random_string.kv_name.result}"
@@ -211,11 +200,8 @@ resource "azurerm_key_vault" "demo_vuln_kv" {
     ]
   }
   
-  # SECURITY VULNERABILITY: Network ACLs not configured (allows all access)
-  network_acls {
-    default_action = "Allow"
-    bypass         = "AzureServices"
-  }
+  # SECURITY VULNERABILITY: Network ACLs allow all (default behavior)
+  # No network_acls block means all networks can access
 }
 
 resource "random_string" "kv_name" {
@@ -235,9 +221,8 @@ resource "random_string" "kv_name" {
 # | CKV_AZURE_149 | azurerm_storage_account    | Large file shares enabled            |
 # | CKV_AZURE_3   | azurerm_virtual_machine    | Managed disk not encrypted (LRS)     |
 # | CKV_AZURE_109 | azurerm_virtual_machine    | Hardcoded password in config         |
-# | CKV_AZURE_117 | azurerm_mssql_server       | Public network access enabled         |
-# | CKV_AZURE_117 | azurerm_cosmosdb_account   | Public network access enabled         |
-# | CKV_AZURE_109 | azurerm_mssql_server       | Hardcoded password in config         |
-# | CKV_AZURE_33  | azurerm_key_vault          | Network ACLs not properly configured |
+# | CKV_AZURE_109 | azurerm_mssql_server      | Hardcoded password in config         |
+# | CKV_AZURE_117 | azurerm_cosmosdb_account  | Public network access enabled         |
+# | CKV_AZURE_33  | azurerm_key_vault         | Network ACLs not properly configured  |
 #
 # =============================================================================
