@@ -1,6 +1,6 @@
 # Storage Account for AKS Cluster - DEMO WITH VULNERABILITIES
 # This file contains intentional security vulnerabilities for demonstration
-# Compatible with Azure Provider 3.15.00, to be updated in provider.tf
+# Compatible with Azure Provider 3.15.00
 
 resource "azurerm_storage_account" "aks_demo_vuln_storage" {
   name                     = "aksdemovuln001"
@@ -25,13 +25,13 @@ resource "azurerm_storage_account" "aks_demo_vuln_storage" {
 
   tags = {
     Environment = "Demo"
-    Project = "AKS Terraform Demo"
+    Project     = "AKS Terraform Demo"
   }
 }
 
 resource "azurerm_storage_container" "aks_demo_vuln_container" {
   name                  = "akslogsvuln"
-  storage_account_name = azurerm_storage_account.aks_demo_vuln_storage.name
+  storage_account_name  = azurerm_storage_account.aks_demo_vuln_storage.name
   container_access_type = "blob"  # VULNERABILITY: Public blob access
 }
 
