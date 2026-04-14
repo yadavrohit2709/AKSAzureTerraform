@@ -1,15 +1,13 @@
 # Storage Account for AKS Cluster - DEMO WITH VULNERABILITIES
 # This file contains intentional security vulnerabilities for demonstration
+# Compatible with Azure Provider 3.15.00, to be updated in provider.tf
 
-resource "azurerm_storage_account" "aks_aksdemo_storage" {
-  name                     = "aksaksdemostorage001"
+resource "azurerm_storage_account" "aks_demo_vuln_storage" {
+  name                     = "aksdemovuln001"
   resource_group_name      = "demo-resource-group"
   location                 = "eastus"
   account_tier             = "Standard"
   account_replication_type = "GRS"
-  
-  # VULNERABILITY: Public access enabled - needs to be disabled for production
-  allow_blob_public_access = true
   
   # VULNERABILITY: Weak TLS version - should use TLS1_2
   min_tls_version          = "TLS1_0"
@@ -31,16 +29,16 @@ resource "azurerm_storage_account" "aks_aksdemo_storage" {
   }
 }
 
-resource "azurerm_storage_container" "aks_aksdemo_container" {
-  name                  = "akslogs"
-  storage_account_name = azurerm_storage_account.aks_aksdemo_storage.name
+resource "azurerm_storage_container" "aks_demo_vuln_container" {
+  name                  = "akslogsvuln"
+  storage_account_name = azurerm_storage_account.aks_demo_vuln_storage.name
   container_access_type = "blob"  # VULNERABILITY: Public blob access
 }
 
-output "aks_storage_account_name" {
-  value = azurerm_storage_account.aks_aksdemo_storage.name
+output "aks_demo_vuln_storage_account_name" {
+  value = azurerm_storage_account.aks_demo_vuln_storage.name
 }
 
-output "aks_storage_account_endpoint" {
-  value = azurerm_storage_account.aks_aksdemo_storage.primary_blob_endpoint
+output "aks_demo_vuln_storage_account_endpoint" {
+  value = azurerm_storage_account.aks_demo_vuln_storage.primary_blob_endpoint
 }
